@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES6"],
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "allowJs": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    // "useNewUrlParser": true,
+  },
+    // "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*"]
+}
