@@ -3,6 +3,6 @@ import { Router } from "express";
 
 const router = Router();
 
-router.get("/history", getHistory);
+router.get("/", getHistory);
 
 export default router;
