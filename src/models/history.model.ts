@@ -1,23 +1,21 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-interface historyInterface extends Document {
-  id: string;
-  user: string;
-  weather: string;
+export interface HistoryInterface {
+  user: mongoose.Types.ObjectId;
+  weather: mongoose.Types.ObjectId;
   lat: number;
   lon: number;
   requestedAt: Date;
 }
 
-const historySchema = new mongoose.Schema({
-  _id: Object,
+const historySchema = new Schema({
   user: {
-    type: Object,
+    type: mongoose.Types.ObjectId,
     ref: "User",
     index: true,
   },
   weather: {
-    type: Object,
+    type: mongoose.Types.ObjectId,
     ref: "Weather",
   },
   lat: Number,
@@ -29,4 +27,7 @@ const historySchema = new mongoose.Schema({
   },
 });
 
-export const History = mongoose.model('History', historySchema)
+export const History = mongoose.model<HistoryInterface>(
+  "History",
+  historySchema
+);

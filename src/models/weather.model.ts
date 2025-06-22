@@ -1,35 +1,29 @@
-// import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-// interface WeatherInterface extends Document {
-//   id: string;
-//   lat: number;
-//   lon: number;
-//   date: string;
-//   fetchedAt: Date;
-// }
-// const weatherSchema = new mongoose.Schema({
-//   _id: Object,
-//   lat: Number, // rounded(2)
-//   lon: Number,
-//   data: mongoose.Schema.Types.Mixed, // raw OpenWeather JSON
-//   fetchedAt: Date, // TTL-indexed
-// });
-
-// export const Weather = mongoose.model('Weather', weatherSchema)
-import mongoose, { Schema, Document } from "mongoose";
-
-interface WeatherData extends Document {
+export interface WeatherInterface {
   lat: number;
   lon: number;
-  data: any; // OpenWeather raw JSON
+  data: any;
   fetchedAt: Date;
 }
 
-const weatherSchema = new Schema<WeatherData>({
-  lat: { type: Number, required: true },
-  lon: { type: Number, required: true },
-  data: { type: Schema.Types.Mixed, required: true },
-  fetchedAt: { type: Date, default: Date.now, index: { expires: "1h" } },
+const weatherSchema = new Schema({
+  lat: {
+    type: Number,
+    required: true,
+  },
+  lon: {
+    type: Number,
+    required: true,
+  },
+  data: Schema.Types.Mixed,
+  fetchedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-export const Weather = mongoose.model<WeatherData>("Weather", weatherSchema);
+export const Weather = mongoose.model<WeatherInterface>(
+  "Weather",
+  weatherSchema
+);

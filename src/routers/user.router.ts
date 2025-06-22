@@ -1,13 +1,12 @@
-import { Router } from 'express';
 import * as AuthController from '../controllers/user.controller';
-import { authorized } from '../middleware/auth.middleware';
+import { Router } from 'express';
+
 
 const router = Router();
 
-//  router
-router.post('/auth/signup', AuthController.signUp);
-router.post('/auth/signin', AuthController.signIn);
-router.post('/auth/signout', AuthController.signOut);
+router.post('/signup', AuthController.signUp )
+router.post('/signin', AuthController.signIn )
+router.post('/signout',AuthController.signOut )
 
 
-export default router; 
+export default router

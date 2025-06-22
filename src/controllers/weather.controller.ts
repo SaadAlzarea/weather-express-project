@@ -1,77 +1,74 @@
 import { Request, Response } from "express";
-import axios from "axios";
 import { Weather } from "../models/weather.model";
+import { History } from "../models/history.model";
+import { verifyToken } from "../config/jwt";
+import axios from "axios";
+import { BAD_REQUEST, OK, UNAUTHORIZED } from "../utils/http-status";
 
-const API_KEY = process.env.OPENWEATHER_API_KEY;
-const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
+export const getWeather = async (req: Request, res: Response) => {
+  const { lon, lat } = req.query;
 
-export const getWeather = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const { lat, lon } = req.query;
-
-  if (!lat || !lon) {
-    res.status(400).json({
+  const token = req.headers.authorization;
+  const verify = verifyToken(token?.split(" ")[1] as string);
+  if (!verify) {
+    res.status(UNAUTHORIZED).json({
       success: false,
       error: {
-        code: "INVALID_TOKEN",
-        message: "JWT expired or malformed.",
+        message: "You should to SignIn",
       },
     });
+    return;
   }
-
-  const latRounded = Math.round(Number(lat) * 100) / 100;
-  const lonRounded = Math.round(Number(lon) * 100) / 100;
-
   try {
-    // Check the cache
-    const cachedWeather = await Weather.findOne({
-      lat: latRounded,
-      lon: lonRounded,
-    });
-    if (cachedWeather) {
-      res.json({
-        source: "cache",
-        coordinates: { lat: latRounded, lon: lonRounded },
-        tempC: cachedWeather.data.main.temp - 273.15, // Convert from Kelvin to Celsius
-        humidity: cachedWeather.data.main.humidity,
-        description: cachedWeather.data.weather[0].description,
-        fetchedAt: cachedWeather.fetchedAt,
+    const weatherExist = await Weather.findOne({ lon: lon, lat: lat });
+    console.log(weatherExist);
+    if (weatherExist) {
+      const newHistory = new History({
+        user: verify.userId,
+        weather: weatherExist._id,
       });
+      await newHistory.save();
+      res.status(OK).json({
+        success: true,
+        source: "cache",
+        data: weatherExist,
+      });
+      return;
     }
 
-    // Fetch from OpenWeather API
-    const response = await axios.get(BASE_URL, {
-      params: {
-        lat: latRounded,
-        lon: lonRounded,
-        appid: API_KEY,
+    const getFromEApi = await axios.get(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+    );
+    const weatherData = await getFromEApi.data;
+
+    const newWeather = new Weather({
+      lat: weatherData.coord.lat,
+      lon: weatherData.coord.lon,
+      data: {
+        coordinates: weatherData.coord,
+        tempC: parseFloat(weatherData.main.temp) - 272.15,
+        humidity: weatherData.main.humidity,
+        description: weatherData.weather[0].description,
       },
     });
 
-    // Save to database
-    const newWeather = await Weather.create({
-      lat: latRounded,
-      lon: lonRounded,
-      data: response.data,
+    await newWeather.save();
+    const newHistory = new History({
+      user: verify.userId,
+      weather: newWeather._id,
     });
 
-    res.json({
+    await newHistory.save();
+    res.status(OK).json({
+      success: true,
       source: "openweather",
-      coordinates: { lat: latRounded, lon: lonRounded },
-      tempC: response.data.main.temp - 273.15,
-      humidity: response.data.main.humidity,
-      description: response.data.weather[0].description,
-      fetchedAt: newWeather.fetchedAt,
+      data: newWeather,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
+  } catch (err: any) {
+    res.status(BAD_REQUEST).json({
       success: false,
       error: {
-        code: "INVALID_TOKEN",
-        message: "JWT expired or malformed.",
+        message: `Error in get weather: ${err.message}`,
       },
     });
   }

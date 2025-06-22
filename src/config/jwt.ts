@@ -1,17 +1,15 @@
-import { SignOptions } from 'jsonwebtoken';
+import JWT, { JwtPayload } from "jsonwebtoken";
+import dotenv from "dotenv";
 
-export const jwtConfig = {
-  secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key',
-  accessToken: {
-    options: {
-      expiresIn: '15m',
-      algorithm: 'HS256',
-    } as SignOptions,
-  },
-  refreshToken: {
-    options: {
-      expiresIn: '7d',
-      algorithm: 'HS256',
-    } as SignOptions,
-  },
-}; 
+dotenv.config();
+
+export const generateToken = (userId: any) => {
+  const token = JWT.sign({ userId }, process.env.JWT_SECRET as string);
+
+  return token;
+};
+
+export const verifyToken = (token: string) => {
+  const verify = JWT.verify(token, process.env.JWT_SECRET as string);
+  return verify as JwtPayload;
+};
