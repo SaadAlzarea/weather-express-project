@@ -68,8 +68,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import authRoutes from './routers/user.router'
 import { INTERNAL_SERVER_ERROR } from './utils/http-status';
-// import historyRoutes from './routes/history.route'
-// import weatherRoutes from './routes/weather.route'
+import historyRoutes from './routers/history.router'
+import weatherRoutes from './routers/weather.router'
 
 const app: Express = express();
 
@@ -89,8 +89,8 @@ app.use(express.urlencoded({ extended: true }));
 
 
 app.use('/auth', authRoutes);
-// app.use('/history', historyRoutes);
-// app.use('/weather', weatherRoutes);
+app.use('/history', historyRoutes);
+app.use('/weather', weatherRoutes);
 
 // Basic error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
